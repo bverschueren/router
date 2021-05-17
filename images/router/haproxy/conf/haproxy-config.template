@@ -224,7 +224,9 @@ frontend public
 
   # check if we need to redirect/force using https.
   acl secure_redirect base,map_reg(/var/lib/haproxy/conf/os_route_http_redirect.map) -m found
-  redirect scheme https if secure_redirect
+  {{- with $redirectReturnCode := index $cfg.Annotations "haproxy.router.openshift.io/redirect-return-code" }}
+  redirect scheme https {{- if isInteger (index $cfg.Annotations "haproxy.router.openshift.io/redirect-return-code")) }} code {{$redirectReturnCode}} {{- end }} if secure_redirect
+  {{- end }}{{/* end redirect-return-code annotation */}}
 
   use_backend %[base,map_reg(/var/lib/haproxy/conf/os_http_be.map)]
 
