@@ -105,8 +105,13 @@ func (o *RouterSelection) Bind(flag *pflag.FlagSet) {
 func (o *RouterSelection) RouteUpdate(route *routev1.Route) {
 	// If the route specifies a subdomain and no host name and we a router
 	// domain, set the host field using the subdomain and domain.
-	if len(route.Spec.Host) == 0 && len(route.Spec.Subdomain) > 0 && len(o.RouterDomain) != 0 {
-		route.Spec.Host = fmt.Sprintf("%s.%s", route.Spec.Subdomain, o.RouterDomain)
+	if len(route.Spec.Host) == 0 && len(o.RouterDomain) != 0 {
+		if len(route.Spec.Subdomain) > 0 {
+			route.Spec.Host = fmt.Sprintf("%s.%s", route.Spec.Subdomain, o.RouterDomain)
+		} else {
+			// if Host and Subdomain is not specified, use shard domain
+			route.Spec.Host = fmt.Sprintf("%s.%s", o.RouterName, o.RouterDomain)
+		}
 	}
 	if len(o.HostnameTemplate) == 0 {
 		return
